@@ -7,27 +7,66 @@
   <body>
     <div id="app" class="">
       <template>
-        <div>
-          el contador esta en {{ contador }}
-          <button @click="sumar" name="button"> sumar 1</button>
-          <button @click="restar" name="button"> restar 1</button>
-        </div>
+        <input type="text" name="nombre" v-model="nombre">
+        <p>Tu nombre en mayudcula es: {{ nombre | uppercase }}</p>
+
+        <form @submit.prevent="submit" method="get">
+          <h2>¿cuales son tus cursos favoritos?</h2>
+          <template v-for="curso in cursos">
+            <curso :curso="curso" @checked="selectCurso"> </curso>
+          </template>
+
+          <button type="submit" >enviar</button>
+        </form>
       </template>
     </div>
     <script src="https://unpkg.com/vue"></script>
     <script type="text/javascript">
+      Vue.component('curso', {
+        props: ['curso'],
+        template:`
+        <div>
+          <input type="checkbox"
+           v-bind:id="curso.value"
+           v-bind:value="curso.value"
+           @change="onchange">
+           <label v-bind:for="curso.value">{{ curso.nombre }}</label>
+        </div>
+        `,
+        methods: {
+          onchange: function(ev) {
+            this.$emit('checked', this.curso.value, ev.target.checked)
+          },
+        }
+      })
       let app = new Vue({
         el: '#app',
         data: {
-          contador: 0
+          nombre: ' ',
+          cursos: [
+            { nombre: 'Curso de vue js', value: 'vue' },
+            { nombre: 'Curso de SEO', value: 'seo' },
+            { nombre: 'Curso de react js', value: 'react' },
+          ],
+          cursosSeleccionados: [],
+        },
+        filters: {
+          uppercase: function (str) {
+            return str.toUpperCase()
+          }
         },
         methods:{
-          restar: function () {
-            this.contador --
+          submit: function () {
+            console.log(this.cursosSeleccionados);
           },
-          sumar: function () {
-            this.contador ++
-          }
+          selectCurso: function (curso, checked) {
+            if (checked) {
+              this.cursosSeleccionados.push(curso)
+            } else {
+              let index = this.cursosSeleccionados.indexOf(curso)
+              this.cursosSeleccionados.splice(index, 1)
+            }
+          },
         }
       })
     </script>
